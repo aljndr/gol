@@ -5,6 +5,7 @@
  * @author     Alejandro Franco Rojas <alejandro.f.rojas@gmail.com>
  */
 
-include 'gol.php';
-$a = new GameOfLife();
-echo $a->move();
+include 'src/GameOfLife.php';
+$gol = new GameOfLife();
+$gol->setBoardRequest($_GET['board']);
+echo $gol->move();

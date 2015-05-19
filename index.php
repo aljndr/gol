@@ -5,7 +5,7 @@
  * @author     Alejandro Franco Rojas <alejandro.f.rojas@gmail.com>
  */
 ?>
-<?php include 'gol.php';?>
+<?php include 'src/GameOfLife.php';?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -22,8 +22,8 @@
         <div class="container">
           <div class="board">
            <?php 
-              $a = new GameOfLife();
-              echo $a->move();
+              $gol = new GameOfLife();
+              echo $gol->move();
            ?>
           </div>
           <div class="controls">

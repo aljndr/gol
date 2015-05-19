@@ -37,7 +37,6 @@ class GameOfLife{
 
 	public function __construct(){
 		$this->stringBoard="";
-		$this->boardRequest = $_GET['board'];
 		$this->board = array(
 			array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 			array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
@@ -62,8 +61,7 @@ class GameOfLife{
 			array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 			array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
 		);	
-		//Array walk to set the board to user request
-		array_walk(array_slice($this->board,0,-2), array($this,"setAndMoveY"));
+		$this->boardRequest = $this->board;
 	}
 	
 
@@ -71,10 +69,9 @@ class GameOfLife{
 	 * Test if the cell have only three Neighbours
 	 *
 	 * @param  int $sum Sum of all Neighbours status
-	 * @param  int $value Vale of the cell to test
 	 * @return int
 	 */
-	protected function testOnlyThree($sum,$value){
+	protected function testOnlyThree($sum){
 		return (((1 << $sum ) & 8) >> 3);
 	}
 
@@ -133,21 +130,21 @@ class GameOfLife{
 	 *
 	 * @param  int Cell value
 	 * @param  int Index of the actual cell
-	 * @param  int Index of the actual row
+	 * @param int Index of the actual row
 	 * @return int 
 	 */
 	protected function moveX($cell,$indexX,$indexY){
 		$value =  $this->pastBoard[($indexX+1)][($indexY+1)];
 		$sum = $this->sumNeighbours($indexX+1,$indexY+1);
-		$value = $this->testOnlyTwo($sum,$value) | $this->testOnlyThree($sum,$value) ; 
+		$value = $this->testOnlyTwo($sum,$value) | $this->testOnlyThree($sum) ; 
 		$this->board[($indexX+1)][($indexY+1)] = $value;
 
-		$class=""; $checked="";
-		if($value){ $class="live"; $checked="checked";}
+		$class = array(" ","live");
+		$checked = array(" ","checked");
 
 		$this->stringBoard.=
-		"<div data-x=\"".($indexX+1)."\" data-y=\"".($indexY+1)."\" id=\"cell_".($indexX+1)."_".($indexY+1)."\" class=\"cell ".$class."\"></div>
-                  <input class=\"cell-input\" style=\"display:none\" ".$checked." type=\"checkbox\" value=\"".$value."\" id=\"input_".($indexX+1)."_".($indexY+1)."\" name=\"board[".($indexX+1)."][".($indexY+1)."]\">";
+		"<div data-x=\"".($indexX+1)."\" data-y=\"".($indexY+1)."\" id=\"cell_".($indexX+1)."_".($indexY+1)."\" class=\"cell ".$class[$value]."\"></div>
+                  <input class=\"cell-input\" style=\"display:none\" ".$checked[$value]." type=\"checkbox\" value=\"".$value."\" id=\"input_".($indexX+1)."_".($indexY+1)."\" name=\"board[".($indexX+1)."][".($indexY+1)."]\">";
 
 		return 0;
 	}
@@ -174,6 +171,38 @@ class GameOfLife{
 		$this->pastBoard = $this->board;
 		array_walk(array_slice($this->board,0,-2), array($this,"moveY"));		
 		return "<form id=\"form_board\">".$this->stringBoard."</form>";
+	}
+
+	/**
+	 * Simulates Y infinity 
+	 */
+	protected function noYBoundaries($row,$indexY){
+		$this->board[$indexY][0]=$this->board[$indexY][sizeof($this->board)-2]; 
+		$this->board[$indexY][sizeof($this->board)-1]=$this->board[$indexY][1]; 
+	}
+
+	/**
+	 * Simulates X infinity 
+	 */
+	protected function noXBoundaries($row,$indexX){
+		$this->board[0][$indexX]=$this->board[sizeof($this->board)-2][$indexX]; 
+		$this->board[sizeof($this->board)-1][$indexX]=$this->board[1][$indexX]; 
+	}
+
+	/**
+	 * Set the board based in the user request 
+	 */
+	public function setBoardRequest($request = array()){
+		var_dump($request);
+		$this->boardRequest = $request;
+		//Array walk to set the board to user request
+		array_walk(array_slice($this->board,0,-2), array($this,"setAndMoveY"));
+		array_walk($this->board, array($this,"noYBoundaries"));
+		array_walk($this->board[0], array($this,"noXBoundaries"));
+	}
+
+	public function getBoard(){
+		return $this->board;
 	}
 }
 
